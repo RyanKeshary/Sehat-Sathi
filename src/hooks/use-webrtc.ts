@@ -84,14 +84,6 @@ export function useWebRTC({ sessionId, isCaller, localStream }: WebRTCOptions) {
     // Add local tracks
     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-    // Data Channel for Chat
-    if (isCaller) {
-      const dc = pc.createDataChannel('chat', { ordered: true });
-      setupDataChannel(dc);
-    } else {
-      pc.ondatachannel = (event) => setupDataChannel(event.channel);
-    }
-
     const setupDataChannel = (dc: RTCDataChannel) => {
       dataChannelRef.current = dc;
       dc.onmessage = (e) => {
@@ -100,6 +92,14 @@ export function useWebRTC({ sessionId, isCaller, localStream }: WebRTCOptions) {
       };
       dc.onopen = () => console.log("Data channel opened");
     };
+
+    // Data Channel for Chat
+    if (isCaller) {
+      const dc = pc.createDataChannel('chat', { ordered: true });
+      setupDataChannel(dc);
+    } else {
+      pc.ondatachannel = (event) => setupDataChannel(event.channel);
+    }
 
     // Signaling Logic
     const startSignaling = async () => {
