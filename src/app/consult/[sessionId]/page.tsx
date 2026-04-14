@@ -1,55 +1,70 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import WaitingRoom from "@/components/video/WaitingRoom";
-import ActiveCall from "@/components/video/ActiveCall";
-import PostCallSummary from "@/components/video/PostCallSummary";
+import { useParams, useRouter } from "next/navigation";
+import { WaitingRoom } from "@/components/video/WaitingRoom";
+import { ActiveCall } from "@/components/video/ActiveCall";
+import { useWebRTC } from "@/hooks/use-webrtc";
+import { useRTCStats } from "@/hooks/use-rtc-stats";
+import { useMediaStream } from "@/hooks/use-media-stream";
 
-export type CallState = "WAITING" | "ACTIVE" | "SUMMARY";
+/**
+ * FIX-010: Real Video Consultation Room
+ * Orchestrates MediaStream, WebRTC, and UI states.
+ */
+export default function ConsultationRoom() {
+  const { sessionId } = useParams();
+  const router = useRouter();
+  const [inCall, setInCall] = useState(false);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
-export default function VideoConsultationPage() {
-  const params = useParams();
-  const sessionId = params.sessionId as string;
+  // Real hooks
+  const { 
+    remoteStream, 
+    connectionStatus, 
+    messages, 
+    sendMessage, 
+    shareScreen, 
+    pc 
+  } = useWebRTC({
+    sessionId: sessionId as string,
+    isCaller: true, // For demo purposes, we assume patient is caller
+    localStream
+  });
 
-  const [callState, setCallState] = useState<CallState>("WAITING");
-  const [durationSeconds, setDurationSeconds] = useState(0);
+  const stats = useRTCStats(pc);
 
-  // Mock duration timer for the active call
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (callState === "ACTIVE") {
-      timer = setInterval(() => {
-        setDurationSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [callState]);
+  const doctorInfo = {
+    name: "Dr. Priya Sharma",
+    specialization: "General Medicine specialist",
+    image: "https://images.unsplash.com/photo-1559839734-2b71f1536780?auto=format&fit=crop&q=80&w=200"
+  };
 
-  const handleJoinCall = () => {
-    setCallState("ACTIVE");
+  const handleJoin = (stream: MediaStream) => {
+    setLocalStream(stream);
+    setInCall(true);
   };
 
   const handleEndCall = () => {
-    setCallState("SUMMARY");
+    localStream?.getTracks().forEach(t => t.stop());
+    router.push('/dashboard');
   };
 
+  if (!inCall) {
+    return <WaitingRoom onJoin={handleJoin} doctorInfo={doctorInfo} />;
+  }
+
   return (
-    <main className="min-h-screen w-full bg-[#060F1E] text-white overflow-hidden relative font-sans">
-      {callState === "WAITING" && (
-        <WaitingRoom onJoin={handleJoinCall} sessionId={sessionId} />
-      )}
-      
-      {callState === "ACTIVE" && (
-        <ActiveCall 
-          onEndCall={handleEndCall} 
-          durationSeconds={durationSeconds} 
-        />
-      )}
-      
-      {callState === "SUMMARY" && (
-        <PostCallSummary durationSeconds={durationSeconds} />
-      )}
-    </main>
+    <ActiveCall 
+      localStream={localStream}
+      remoteStream={remoteStream}
+      connectionStatus={connectionStatus}
+      doctorInfo={doctorInfo}
+      onEndCall={handleEndCall}
+      messages={messages}
+      onSendMessage={sendMessage}
+      onShareScreen={shareScreen}
+      stats={stats}
+    />
   );
 }

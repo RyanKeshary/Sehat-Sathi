@@ -1,44 +1,137 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { Video, Brain, FileText, Users, CheckCircle2 } from "lucide-react";
 import ScrollReveal from "../animations/ScrollReveal";
 import LanguageMorphText from "../ai/LanguageMorphText";
 import { cn } from "@/utils/cn";
+import { useMobile } from "@/hooks/useMobile";
 
 const FEATURES = [
   {
     title: "Video Doctor Consult",
     subtitle: "Real-time care for remote areas",
-    icon: <Video className="w-12 h-12" />,
+    icon: <Video className="w-10 h-10 sm:w-12 sm:h-12" />,
     color: "from-[#00C896] to-[#3B82F6]",
     bullets: ["Low-latency VP9 Codec", "Auto bandwidth adjustment", "Digital prescriptions", "Works on 2G/3G"],
   },
   {
     title: "AI Symptom Checker",
     subtitle: "Triage in your mother tongue",
-    icon: <Brain className="w-12 h-12" />,
+    icon: <Brain className="w-10 h-10 sm:w-12 sm:h-12" />,
     color: "from-blue-600 to-indigo-600",
     bullets: ["Support for 15+ Indic languages", "AI-driven triage (Safe/Watch/Emergency)", "Anonymous health screening", "Voice-input support"],
   },
   {
     title: "Digital Health Records",
     subtitle: "Your medical history, offline",
-    icon: <FileText className="w-12 h-12" />,
+    icon: <FileText className="w-10 h-10 sm:w-12 sm:h-12" />,
     color: "from-purple-600 to-pink-600",
     bullets: ["ABHA ID Integration", "Encrypted offline vault", "Scan & upload paper records", "Automatic server sync"],
   },
   {
     title: "ASHA Worker Mode",
     subtitle: "Empowering frontline heroes",
-    icon: <Users className="w-12 h-12" />,
+    icon: <Users className="w-10 h-10 sm:w-12 sm:h-12" />,
     color: "from-orange-500 to-red-500",
     bullets: ["Dedicated worker dashboard", "Offline patient registration", "Follow-up reminders", "Community health tracking"],
   }
 ];
 
-export default function FeaturesSection() {
+/** ─── Mobile Vertical Stack ────────────────────────────── */
+function MobileFeatures() {
+  const cardsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!cardsRef.current) return;
+
+    const cards = cardsRef.current.querySelectorAll(".mobile-feature-card");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div id="features-section" className="bg-[#060F1E] py-16 px-4 sm:px-6">
+      <ScrollReveal className="text-center max-w-4xl mx-auto mb-12 px-2">
+        <h3 className="text-white text-2xl sm:text-3xl font-display font-bold mb-3">
+          One Platform. Everything You Need.
+        </h3>
+        <p className="text-white/60 text-base sm:text-lg font-medium max-w-2xl mx-auto">
+          We built Sehat Sathi to solve every barrier — distance, language, connectivity, and cost.
+        </p>
+      </ScrollReveal>
+
+      <div ref={cardsRef} className="flex flex-col gap-6 max-w-lg mx-auto">
+        {FEATURES.map((feature, i) => (
+          <div
+            key={i}
+            className="mobile-feature-card rounded-2xl overflow-hidden relative"
+          >
+            {/* Subtle gradient BG */}
+            <div className={cn("absolute inset-0 opacity-[0.07] bg-gradient-to-br", feature.color)} />
+
+            <div className="relative z-10 p-6 sm:p-8">
+              <div className={cn(
+                "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br shadow-xl text-white",
+                feature.color
+              )}>
+                {feature.icon}
+              </div>
+
+              <h4 className="text-2xl sm:text-3xl font-display font-extrabold text-white mb-2">
+                {feature.title}
+              </h4>
+
+              {i === 1 ? (
+                <LanguageMorphText 
+                  options={[
+                    { text: "Describe your symptoms", language: "en" },
+                    { text: "अपने लक्षण बताएं", language: "hi" },
+                    { text: "ਆਪਣੇ ਲੱਛਣ ਦੱਸੋ", language: "pa" },
+                    { text: "మీ లక్షణాలను వివరించండి", language: "te" },
+                    { text: "உங்கள் அறிகுறிகளை விவரிக்கவும்", language: "ta" }
+                  ]}
+                  className="text-base text-white/60 mb-6 font-medium italic overflow-hidden"
+                />
+              ) : (
+                <p className="text-base text-white/60 mb-6 font-medium italic">
+                  {feature.subtitle}
+                </p>
+              )}
+
+              <ul className="space-y-3">
+                {feature.bullets.map((bullet, idx) => (
+                  <li key={idx} className="flex items-center gap-2.5 text-white/80 text-sm sm:text-base">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-accent shrink-0" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Bottom border accent */}
+            <div className={cn("h-1 w-full bg-gradient-to-r", feature.color)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** ─── Desktop Horizontal Scroll ────────────────────────── */
+function DesktopFeatures() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const panelsRef = useRef<HTMLDivElement[]>([]);
@@ -60,7 +153,7 @@ export default function FeaturesSection() {
       },
     });
 
-    // Child animations for each panel — content slides up as panel enters center
+    // Child animations for each panel
     panelsRef.current.forEach((panel) => {
       if (!panel) return;
       const content = panel.querySelector(".feature-content");
@@ -199,4 +292,12 @@ export default function FeaturesSection() {
       </div>
     </div>
   );
+}
+
+/** ─── Main Export — conditional rendering ───────────────── */
+export default function FeaturesSection() {
+  const isMobile = useMobile();
+
+  // Render mobile vertical stack or desktop horizontal scroll
+  return isMobile ? <MobileFeatures /> : <DesktopFeatures />;
 }

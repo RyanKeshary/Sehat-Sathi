@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/utils/cn";
-import { Globe, ChevronDown, Menu, X } from "lucide-react";
+import { Globe } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const NAV_LINKS = [
@@ -30,24 +30,42 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  const closeMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
   return (
     <nav
+      suppressHydrationWarning
       className={cn(
         "fixed left-0 right-0 z-50 transition-all duration-300",
         isLanding 
-          ? (isScrolled ? "top-5 mx-auto w-[min(90%,1280px)]" : "top-0 w-full px-6 py-4 bg-transparent")
+          ? (isScrolled ? "top-5 mx-auto w-[min(90%,1280px)]" : "top-0 w-full px-4 sm:px-6 py-4 bg-transparent")
           : "top-0 w-full bg-[#0A2540]/80 backdrop-blur-xl border-b border-white/5 py-3"
       )}
     >
       <motion.div 
+        suppressHydrationWarning
         animate={{
-          backgroundColor: isLanding && !isScrolled ? "transparent" : "rgba(10, 37, 64, 0.4)",
+          backgroundColor: isLanding && !isScrolled ? "rgba(10, 37, 64, 0)" : "rgba(10, 37, 64, 0.4)",
           backdropFilter: isLanding && !isScrolled ? "blur(0px)" : "blur(16px)",
           borderRadius: isLanding && isScrolled ? "9999px" : "0px",
           padding: isLanding && isScrolled ? "0.75rem 1.75rem" : "0.5rem 1.5rem",
         }}
         className={cn(
-          "flex items-center justify-between shadow-2xl transition-all duration-500",
+          "relative flex items-center justify-between shadow-2xl transition-all duration-500",
           isLanding && isScrolled && "border border-white/10"
         )}
       >
@@ -64,6 +82,8 @@ export default function Navbar() {
               src="/assets/images/sehat sathi logo .png"
               alt="Sehat Sathi Logo"
               fill
+              sizes="32px"
+              suppressHydrationWarning
               className="object-contain"
             />
           </motion.div>
@@ -90,7 +110,7 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Right Actions */}
+        {/* Right Actions (Desktop) */}
         <div className="hidden md:flex items-center gap-6">
           <LanguageSwitcher />
 
@@ -102,36 +122,57 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile Toggle */}
+        {/* Mobile Hamburger Button — animated 3-line to X */}
         <button
-          className="md:hidden text-white p-2 hover:bg-white/10 rounded-full transition-colors"
+          className={cn(
+            "md:hidden flex flex-col items-center justify-center gap-[5px] w-11 h-11 rounded-full hover:bg-white/10 transition-colors",
+            isMobileMenuOpen && "hamburger-open"
+          )}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isMobileMenuOpen}
         >
-          {isMobileMenuOpen ? <X /> : <Menu />}
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
+          <span className="hamburger-line" />
         </button>
       </motion.div>
 
-      {/* Mobile Menu */}
+      {/* ─── Mobile Full-Screen Overlay Menu ─────────────── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "100vh" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="fixed inset-0 bg-[#060F1E] z-40 md:hidden flex flex-col p-8 pt-24"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            className="fixed inset-0 bg-[#060F1E] z-[9998] md:hidden flex flex-col overflow-y-auto"
+            style={{ height: "100dvh" }}
           >
-            <div className="flex flex-col gap-6">
+            {/* Close button */}
+            <div className="flex justify-end p-6">
+              <button
+                onClick={closeMobileMenu}
+                className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-white text-2xl font-light"
+                aria-label="Close menu"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Nav Links — large tap targets */}
+            <div className="flex flex-col gap-5 px-8 pt-4">
               {NAV_LINKS.map((link, i) => (
                 <motion.div
                   key={link.name}
-                  initial={{ x: -20, opacity: 0 }}
+                  initial={{ x: 40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.08, duration: 0.3, ease: "easeOut" }}
                 >
                   <Link
                     href={link.href}
-                    className="text-3xl font-bold text-white/80 hover:text-white"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-[24px] font-bold text-white/80 hover:text-white py-2 transition-colors active:text-accent"
+                    onClick={closeMobileMenu}
                   >
                     {link.name}
                   </Link>
@@ -139,30 +180,37 @@ export default function Navbar() {
               ))}
             </div>
             
-            <hr className="border-white/10 my-8" />
+            <hr className="border-white/10 mx-8 my-8" />
             
-            <div className="flex flex-col gap-6">
-              <motion.button 
+            {/* Language + CTAs */}
+            <div className="flex flex-col gap-6 px-8 pb-8">
+              <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex items-center gap-3 text-xl text-white/80"
+                transition={{ delay: 0.4 }}
               >
-                <Globe className="w-6 h-6" />
-                <span>Change Language</span>
-              </motion.button>
-              
+                <LanguageSwitcher />
+              </motion.div>
+
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="flex flex-col gap-4"
               >
                 <Link
                   href="/get-started"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="bg-accent text-dark-bg block w-full py-4 rounded-2xl font-bold text-center text-lg glow-green"
+                  onClick={closeMobileMenu}
+                  className="bg-accent text-dark-bg block w-full py-4 rounded-2xl font-bold text-center text-lg glow-green active:scale-95 transition-transform"
                 >
                   Get Started
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={closeMobileMenu}
+                  className="border border-white/20 text-white block w-full py-4 rounded-2xl font-bold text-center text-lg hover:bg-white/5 active:scale-95 transition-all"
+                >
+                  Go to Dashboard
                 </Link>
               </motion.div>
             </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { 
-  Wallet, 
+  Banknote, 
   ArrowUpRight, 
   Heart, 
   Download, 
@@ -41,7 +41,7 @@ export default function DoctorEarningsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
            <div className="bg-[#0A2540] rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10">
-                 <Wallet className="w-20 h-20" />
+                 <Banknote className="w-20 h-20" />
               </div>
               <div className="relative z-10">
                  <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-1">Available to Payout</p>

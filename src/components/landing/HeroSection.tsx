@@ -3,9 +3,14 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
-import ParticleBackground from "../animations/ParticleBackground";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import VideoModal from "./VideoModal";
+
+const ParticleBackground = dynamic(() => import("../animations/ParticleBackground"), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 z-0 pointer-events-none opacity-60" />,
+});
 
 const SOCIAL_PROOFS = [
   { icon: "🏥", text: "500+ Verified Doctors", delay: 0.1 },
@@ -21,22 +26,22 @@ export default function HeroSection() {
   return (
     <section
       id="hero-section"
-      className="relative min-h-screen w-full flex flex-col justify-center items-center overflow-hidden bg-dark-bg pt-20"
+      className="relative w-full flex flex-col justify-center items-center overflow-hidden bg-dark-bg pt-20 min-h-screen-safe"
     >
       {/* Background */}
-      <div id="hero-particles">
+      <div id="hero-particles" suppressHydrationWarning>
         <ParticleBackground />
       </div>
 
       {/* Content */}
-      <div id="hero-content" className="container relative z-10 px-6 text-center">
-        {/* Headline */}
+      <div id="hero-content" className="container relative z-10 px-4 sm:px-6 text-center" suppressHydrationWarning>
+        {/* Headline — mobile-first responsive sizing */}
         <div className="mb-6 flex flex-col items-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-extrabold text-5xl lg:text-7xl text-white leading-tight"
+            className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-white leading-tight"
           >
             800 Million Indians
           </motion.h1>
@@ -44,7 +49,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-extrabold text-5xl lg:text-7xl leading-tight"
+            className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-7xl leading-tight"
           >
             Deserve <span className="bg-gradient-to-r from-[#00C896] to-[#3B82F6] bg-clip-text text-transparent">Better Healthcare</span>
           </motion.h1>
@@ -52,7 +57,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-bold text-2xl lg:text-3xl text-white/70"
+            className="font-display font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/70"
           >
             Starting Right Now.
           </motion.h1>
@@ -63,7 +68,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-[640px] mx-auto font-sans text-base lg:text-xl text-white/65 mb-10 leading-relaxed text-center"
+          className="max-w-[640px] mx-auto font-sans text-sm sm:text-base lg:text-xl text-white/65 mb-8 sm:mb-10 leading-relaxed text-center px-2"
         >
           Sehat Sathi connects rural patients with certified doctors through video consultation, 
           checks symptoms in 10+ Indian languages using AI, and keeps your health records safe 
@@ -75,13 +80,13 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-16 px-4 sm:px-0"
         >
-          <Link href="/get-started">
+          <Link href="/get-started" className="w-full sm:w-auto">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              className="group h-[52px] bg-accent text-dark-bg px-8 rounded-full font-bold flex items-center gap-2 glow-green"
+              className="group h-[52px] w-full sm:w-auto bg-accent text-dark-bg px-8 rounded-full font-bold flex items-center justify-center gap-2 glow-green"
             >
               <span>Start Free Consultation</span>
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -92,15 +97,15 @@ export default function HeroSection() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setIsVideoOpen(true)}
-            className="h-[52px] border border-white/20 hover:border-white/40 px-8 rounded-full font-bold flex items-center gap-2 transition-colors"
+            className="h-[52px] w-full sm:w-auto border border-white/20 hover:border-white/40 px-8 rounded-full font-bold flex items-center justify-center gap-2 transition-colors"
           >
             <Play className="w-4 h-4 fill-white" />
             <span>Watch How It Works</span>
           </motion.button>
         </motion.div>
 
-        {/* Social Proof Chips */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        {/* Social Proof Chips — fewer visible on smallest screens */}
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-2">
           {SOCIAL_PROOFS.map((proof, idx) => (
             <motion.div
               key={idx}
@@ -118,7 +123,7 @@ export default function HeroSection() {
                   delay: proof.delay * 2 
                 }
               }}
-              className="glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium border-white/5"
+              className="glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium border-white/5"
             >
               <span>{proof.icon}</span>
               <span className="text-white/80">{proof.text}</span>
@@ -127,11 +132,11 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll Indicator — hidden on very small screens */}
       <motion.div
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 hidden sm:flex"
       >
         <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center p-1">
           <motion.div 
