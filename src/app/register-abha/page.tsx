@@ -402,6 +402,10 @@ export default function RegisterAbha() {
                 <div className="flex gap-4">
                   <button onClick={prevStep} className="flex-1 py-4 font-bold text-slate-400">Back</button>
                   <button 
+                    onClick={() => {
+                      alert("ABHA Registration Successful! Redirecting to your health records...");
+                      window.location.href = "/records";
+                    }}
                     disabled={!isConsentComplete}
                     className="flex-[2] py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 disabled:opacity-50 disabled:grayscale transition-all"
                   >

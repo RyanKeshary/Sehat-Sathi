@@ -135,21 +135,44 @@ export default function SymptomChecker() {
     }
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    const userMsg = { id: Date.now(), role: "patient", text: input };
+    const userText = input;
+    const userMsg = { id: Date.now(), role: "patient", text: userText };
+    const newMessages = [...messages, userMsg];
     setMessages([...messages, userMsg]);
     setInput("");
     
     setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
+    
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messages: newMessages.map(m => ({
+            role: m.role === "ai" ? "assistant" : "user",
+            content: m.text
+          }))
+        })
+      });
+      
+      const data = await response.json();
+      
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: "ai",
-        text: "Thank you for sharing that. I'm processing your symptoms now."
+        text: data.content || "Thank you for sharing that. I'm processing your symptoms now."
       }]);
-    }, 2000);
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: "ai",
+        text: "I encountered a connection error. Please try again."
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (

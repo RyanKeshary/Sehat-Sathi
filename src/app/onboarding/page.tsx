@@ -84,46 +84,96 @@ function LanguagePill({ name, selected, onSelect }: LanguagePillProps) {
   );
 }
 
+import Link from "next/link";
+
 function ActionCard({ 
   icon: Icon, 
   title, 
   desc, 
   delay,
-  onClick
+  href
 }: { 
   icon: React.ElementType; 
   title: string; 
   desc: string; 
   delay: number;
-  onClick: () => void;
+  href: string;
 }) {
   return (
-    <motion.button
-      onClick={onClick}
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.3 }}
-      whileTap={{ scale: 0.97 }}
-      className="w-full bg-white p-5 rounded-2xl border border-accent border-l-[3px] border-l-primary flex items-center gap-4 text-left shadow-sm hover:shadow-md transition-shadow group"
-    >
-      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-        <Icon className="w-7 h-7" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-lg font-bold text-[#0C4A6E]">{title}</h4>
-        <p className="text-[15px] text-slate-500">{desc}</p>
-      </div>
-      <ChevronRight className="w-5 h-5 text-accent group-hover:text-primary transition-colors" />
-    </motion.button>
+    <Link href={href} className="w-full block">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.3 }}
+        whileTap={{ scale: 0.97 }}
+        className="w-full bg-white p-5 rounded-2xl border border-accent border-l-[3px] border-l-primary flex items-center gap-4 text-left shadow-sm hover:shadow-md transition-shadow group"
+      >
+        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+          <Icon className="w-7 h-7" />
+        </div>
+        <div className="flex-1">
+          <h4 className="text-lg font-bold text-[#0C4A6E]">{title}</h4>
+          <p className="text-[15px] text-slate-500">{desc}</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-accent group-hover:text-primary transition-colors" />
+      </motion.div>
+    </Link>
   );
 }
 
 // --- Main Page ---
 
+const translations: Record<string, any> = {
+  English: {
+    choose: "Choose your language",
+    symptomCheck: "Symptom Check",
+    symptomDesc: "Instant AI triage & severity check",
+    consult: "Consult a Doctor",
+    consultDesc: "Book video or physical visit",
+    records: "My Health Records",
+    recordsDesc: "Secure FHIR-synced health vault",
+    login: "Login with ABHA",
+    footer: "Providing your data contributes to better health outcomes. Fully DPDPA compliant storage.",
+    offlineText: "Offline — your records are still available",
+    onlineText: "Online",
+    tagline: "Your health, our responsibility"
+  },
+  Hindi: {
+    choose: "अपनी भाषा चुनें",
+    symptomCheck: "लक्षण जांच",
+    symptomDesc: "त्वरित एआई ट्राइएज और गंभीरता जांच",
+    consult: "डॉक्टर से परामर्श लें",
+    consultDesc: "वीडियो या भौतिक यात्रा बुक करें",
+    records: "मेरे स्वास्थ्य रिकॉर्ड",
+    recordsDesc: "सुरक्षित FHIR-सिंक किया गया स्वास्थ्य वॉल्ट",
+    login: "आभा (ABHA) के साथ लॉगिन करें",
+    footer: "आपका डेटा बेहतर स्वास्थ्य परिणाम देने में योगदान करता है। पूर्ण रूप से DPDPA अनुपालक संग्रहण।",
+    offlineText: "ऑफ़लाइन — आपके रिकॉर्ड अभी भी उपलब्ध हैं",
+    onlineText: "ऑनलाइन",
+    tagline: "आपका स्वास्थ्य, हमारी जिम्मेदारी"
+  },
+  Marathi: {
+    choose: "तुमची भाषा निवडा",
+    symptomCheck: "लक्षण तपासणी",
+    symptomDesc: "त्वरित एआय ट्रायज आणि तीव्रता तपासणी",
+    consult: "डॉक्टरांचा सल्ला घ्या",
+    consultDesc: "व्हिडिओ किंवा प्रत्यक्ष भेट बुक करा",
+    records: "माझे आरोग्य रेकॉर्ड",
+    recordsDesc: "सुरक्षित FHIR-सिंक केलेले आरोग्य व्हॉल्ट",
+    login: "ABHA सह लॉग इन करा",
+    footer: "तुमचा डेटा चांगल्या आरोग्य परिणामांना हातभार लावतो. पूर्णपणे DPDPA सुसंगत स्टोरेज.",
+    offlineText: "ऑफलाइन — तुमचे रेकॉर्ड अद्याप उपलब्ध आहेत",
+    onlineText: "ऑनलाइन",
+    tagline: "तुमचे आरोग्य, आमची जबाबदारी"
+  }
+};
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [selectedLang, setSelectedLang] = useState("English");
   const [isOnline, setIsOnline] = useState(true);
+  
+  const t = translations[selectedLang] || translations.English;
 
   useEffect(() => {
     // Basic connectivity simulation (toggles every 15s for demo)
@@ -169,7 +219,7 @@ export default function OnboardingPage() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#0C4A6E] tracking-tight">Sehat Sathi</h1>
-            <p className="text-base font-medium text-slate-500">Your health, our responsibility</p>
+            <p className="text-base font-medium text-slate-500">{t.tagline}</p>
           </div>
         </motion.div>
 
@@ -181,7 +231,7 @@ export default function OnboardingPage() {
         >
           {/* LANGUAGE GRID */}
           <motion.div variants={itemVariants} className="bg-white p-6 rounded-[20px] border border-accent shadow-sm">
-            <h2 className="text-lg font-bold text-[#0C2D43] mb-5">Choose your language</h2>
+            <h2 className="text-lg font-bold text-[#0C2D43] mb-5">{t.choose}</h2>
             <div className="grid grid-cols-3 gap-3">
               {languages.map((lang) => (
                 <LanguagePill
@@ -199,49 +249,49 @@ export default function OnboardingPage() {
             <ActionCard 
               delay={0.4}
               icon={Stethoscope}
-              title="Symptom Check"
-              desc="Instant AI triage & severity check"
-              onClick={() => router.push("/symptom-checker")}
+              title={t.symptomCheck}
+              desc={t.symptomDesc}
+              href="/symptom-checker"
             />
             <ActionCard 
               delay={0.5}
               icon={Video}
-              title="Consult a Doctor"
-              desc="Book video or physical visit"
-              onClick={() => router.push("/voice-intake")}
+              title={t.consult}
+              desc={t.consultDesc}
+              href="/voice-intake"
             />
             <ActionCard 
               delay={0.6}
               icon={Folder}
-              title="My Health Records"
-              desc="Secure FHIR-synced health vault"
-              onClick={() => router.push("/records")}
+              title={t.records}
+              desc={t.recordsDesc}
+              href="/records"
             />
           </div>
 
           {/* ABHA LOGIN */}
-          <motion.button 
-            variants={itemVariants}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => router.push("/register-abha")}
-            className="w-full bg-white py-4 rounded-xl border border-primary/40 flex items-center justify-center gap-3 shadow-sm hover:bg-accent/20 transition-colors"
-          >
-            {/* Ayushman Emblem (Stylized Gold) */}
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8A6D3B] flex items-center justify-center">
-              <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-[#D4AF37] rounded-full" />
+          <Link href="/register-abha" className="w-full block">
+            <motion.div 
+              variants={itemVariants}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-white py-4 rounded-xl border border-primary/40 flex items-center justify-center gap-3 shadow-sm hover:bg-accent/20 transition-colors cursor-pointer"
+            >
+              {/* Ayushman Emblem (Stylized Gold) */}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8A6D3B] flex items-center justify-center">
+                <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-[#D4AF37] rounded-full" />
+                </div>
               </div>
-            </div>
-            <span className="font-bold text-primary">Login with ABHA</span>
-          </motion.button>
+              <span className="font-bold text-primary">{t.login}</span>
+            </motion.div>
+          </Link>
           
           {/* FOOTER */}
           <motion.p 
             variants={itemVariants}
             className="text-center text-sm text-slate-400 font-medium leading-relaxed px-4"
           >
-            Providing your data contributes to better health outcomes. 
-            Fully DPDPA compliant storage.
+            {t.footer}
           </motion.p>
         </motion.div>
       </div>
@@ -261,7 +311,7 @@ export default function OnboardingPage() {
             isOnline ? "bg-emerald-500" : "bg-amber-500 shadow-[0_0_10px_#f59e0b]"
           )} />
           <span className="text-sm font-bold text-heading">
-            {isOnline ? "Online" : "Offline — your records are still available"}
+            {isOnline ? t.onlineText : t.offlineText}
           </span>
           {isOnline ? <Wifi className="w-3 h-3 opacity-30" /> : <WifiOff className="w-3 h-3 opacity-30" />}
         </div>
