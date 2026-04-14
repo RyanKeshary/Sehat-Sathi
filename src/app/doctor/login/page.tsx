@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Cross, 
@@ -115,6 +116,7 @@ const OTPInput = ({ count = 6, onComplete, error }: { count?: number; onComplete
 // --- Page Component ---
 
 export default function DoctorLogin() {
+  const router = useRouter();
   const [view, setView] = useState<"form" | "otp" | "success">("form");
   const [showPassword, setShowPassword] = useState(false);
   const [showAbhaModal, setShowAbhaModal] = useState(false);
@@ -347,7 +349,10 @@ export default function DoctorLogin() {
                     </div>
                   </motion.div>
 
-                  <button className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 group transition-transform hover:translate-y-[-2px]">
+                  <button 
+                    onClick={() => router.push("/doctor/dashboard")}
+                    className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 group transition-transform hover:translate-y-[-2px]"
+                  >
                     Enter Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </button>
               </div>

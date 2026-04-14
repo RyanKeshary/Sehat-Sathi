@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Cross, 
@@ -87,15 +88,18 @@ function ActionCard({
   icon: Icon, 
   title, 
   desc, 
-  delay 
+  delay,
+  onClick
 }: { 
   icon: React.ElementType; 
   title: string; 
   desc: string; 
   delay: number;
+  onClick: () => void;
 }) {
   return (
     <motion.button
+      onClick={onClick}
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}
@@ -117,6 +121,7 @@ function ActionCard({
 // --- Main Page ---
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [selectedLang, setSelectedLang] = useState("English");
   const [isOnline, setIsOnline] = useState(true);
 
@@ -196,18 +201,21 @@ export default function OnboardingPage() {
               icon={Stethoscope}
               title="Symptom Check"
               desc="Instant AI triage & severity check"
+              onClick={() => router.push("/symptom-checker")}
             />
             <ActionCard 
               delay={0.5}
               icon={Video}
               title="Consult a Doctor"
               desc="Book video or physical visit"
+              onClick={() => router.push("/voice-intake")}
             />
             <ActionCard 
               delay={0.6}
               icon={Folder}
               title="My Health Records"
               desc="Secure FHIR-synced health vault"
+              onClick={() => router.push("/records")}
             />
           </div>
 
@@ -215,6 +223,7 @@ export default function OnboardingPage() {
           <motion.button 
             variants={itemVariants}
             whileTap={{ scale: 0.98 }}
+            onClick={() => router.push("/register-abha")}
             className="w-full bg-white py-4 rounded-xl border border-primary/40 flex items-center justify-center gap-3 shadow-sm hover:bg-accent/20 transition-colors"
           >
             {/* Ayushman Emblem (Stylized Gold) */}

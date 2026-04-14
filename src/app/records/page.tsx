@@ -227,7 +227,7 @@ export default function RecordTimeline() {
 
         {/* CONTENT TABS */}
         <AnimatePresence mode="wait">
-           {activeTab === 0 ? (
+           {activeTab === 0 && (
              <motion.div 
               key="consul-tab"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
@@ -259,7 +259,8 @@ export default function RecordTimeline() {
                    ))}
                 </div>
              </motion.div>
-           ) : (
+           )}
+           {activeTab === 1 && (
              <motion.div 
               key="labs-tab"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
@@ -296,6 +297,28 @@ export default function RecordTimeline() {
                      <Download size={20} /> Download PDF Report
                    </button>
                 </div>
+             </motion.div>
+           )}
+           {activeTab === 2 && (
+             <motion.div 
+               key="prescriptions-tab"
+               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+               className="bg-white p-10 rounded-[32px] border border-sky-100 shadow-xl text-center space-y-4"
+             >
+               <Pill className="w-16 h-16 text-slate-200 mx-auto" />
+               <h3 className="text-xl font-black text-sky-900">Active Prescriptions</h3>
+               <p className="text-slate-500 font-medium">You currently have 2 active digital prescriptions mapped to your ABHA.</p>
+             </motion.div>
+           )}
+           {activeTab === 3 && (
+             <motion.div 
+               key="allergies-tab"
+               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+               className="bg-white p-10 rounded-[32px] border border-sky-100 shadow-xl text-center space-y-4"
+             >
+               <AlertCircle className="w-16 h-16 text-slate-200 mx-auto" />
+               <h3 className="text-xl font-black text-sky-900">Recorded Allergies</h3>
+               <p className="text-slate-500 font-medium">1 identified allergy (Penicillin). Information is synced with ABDM network.</p>
              </motion.div>
            )}
         </AnimatePresence>
