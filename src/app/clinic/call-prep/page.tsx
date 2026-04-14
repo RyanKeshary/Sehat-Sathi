@@ -64,6 +64,7 @@ const MergeFieldPopover = ({ field, value, onSave, onClose }: any) => (
 export default function AIPrepScreen() {
   const [tone, setTone] = useState("Gentle");
   const [isShimmering, setIsShimmering] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
   const [isCulturalOpen, setIsCulturalOpen] = useState(true);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [checklist, setChecklist] = useState([true, true, true, false]);
@@ -75,11 +76,31 @@ export default function AIPrepScreen() {
     TEST_NAME: "HbA1c Lab Test"
   });
 
+  const fetchScript = async (t: string, currentFieldValues: typeof fieldValues) => {
+    setIsShimmering(true);
+    try {
+      const res = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientName: currentFieldValues.PATIENT_NAME,
+          condition: "Diabetes Type 2",
+          tone: t,
+        })
+      });
+      const data = await res.json();
+      setGeneratedScript(data.script);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsShimmering(false);
+    }
+  };
+
   const handleToneChange = (t: string) => {
     if (tone === t) return;
     setTone(t);
-    setIsShimmering(true);
-    setTimeout(() => setIsShimmering(false), 900);
+    fetchScript(t, fieldValues);
   };
 
   const updateField = (field: string, val: string) => {
@@ -97,7 +118,10 @@ export default function AIPrepScreen() {
             <h1 className="text-xl font-black text-sky-900 leading-none">Call Prep — Mrs. Priya Sharma</h1>
             <div className="px-3 py-1 bg-sky-50 border border-sky-100 text-[10px] font-black text-sky-400 uppercase tracking-widest rounded-lg">Est. 3–5 min</div>
          </div>
-         <button className="h-12 px-8 bg-primary text-white font-black rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+         <button 
+           onClick={() => alert("Initiating call via Exotel integration...")}
+           className="h-12 px-8 bg-primary text-white font-black rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+         >
             <Phone size={20} /> Begin IVR Call
          </button>
       </header>
@@ -184,6 +208,10 @@ export default function AIPrepScreen() {
                <div className={cn("min-h-[280px] relative rounded-3xl p-4 transition-opacity", isShimmering ? "opacity-40 pointer-events-none" : "opacity-100")}>
                   {isShimmering ? (
                     <ScriptShimmer />
+                  ) : generatedScript ? (
+                    <div className="text-[17px] text-slate-700 leading-[1.8] font-medium whitespace-pre-line space-y-6">
+                      {generatedScript}
+                    </div>
                   ) : (
                     <div className="text-[17px] text-slate-700 leading-[1.8] font-medium whitespace-pre-line space-y-6">
                        <p>
@@ -259,8 +287,11 @@ export default function AIPrepScreen() {
                   )}
                </div>
 
-               <button className="mt-10 flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest hover:translate-x-1 transition-all">
-                  Regenerate Script <RefreshCcw size={14} className="animate-spin-slow" />
+               <button 
+                  onClick={() => fetchScript(tone, fieldValues)}
+                  className="mt-10 flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-widest hover:translate-x-1 transition-all"
+               >
+                  Regenerate Script <RefreshCcw size={14} className={cn(isShimmering && "animate-spin-slow")} />
                </button>
             </div>
 

@@ -143,6 +143,7 @@ const TimelineCard = ({ consul }: any) => {
 
 export default function RecordTimeline() {
   const [activeTab, setActiveTab] = useState(0);
+  const [showQr, setShowQr] = useState(false);
   const tabs = ["Consultations", "Lab Results", "Prescriptions", "Allergies"];
 
   return (
@@ -161,7 +162,10 @@ export default function RecordTimeline() {
            <div className="px-3 py-1 bg-emerald-50 text-emerald-600 font-black text-[10px] uppercase tracking-widest rounded-lg border border-emerald-100 flex items-center gap-1.5">
              <ShieldCheck className="w-3.5 h-3.5" /> Offline Cache ✓
            </div>
-           <button className="flex items-center gap-2 text-primary font-black text-[12px] uppercase tracking-widest hover:bg-primary/5 px-4 py-2 rounded-xl transition-all">
+           <button 
+             onClick={() => alert("FHIR Records bundled and exported successfully.")}
+             className="flex items-center gap-2 text-primary font-black text-[12px] uppercase tracking-widest hover:bg-primary/5 px-4 py-2 rounded-xl transition-all"
+           >
              <Share2 className="w-4 h-4" /> Export
            </button>
         </div>
@@ -197,7 +201,10 @@ export default function RecordTimeline() {
                  </div>
               </div>
            </div>
-           <button className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-[20px] flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all self-center">
+           <button 
+             onClick={() => setShowQr(true)}
+             className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-[20px] flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all self-center"
+           >
               <QrCode size={28} />
            </button>
         </section>
@@ -293,7 +300,10 @@ export default function RecordTimeline() {
                          ))}
                       </div>
                    </div>
-                   <button className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3">
+                   <button 
+                     onClick={() => alert("Downloading Lab Report T2-2026.pdf...")}
+                     className="w-full h-14 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform active:scale-95"
+                   >
                      <Download size={20} /> Download PDF Report
                    </button>
                 </div>
@@ -324,6 +334,53 @@ export default function RecordTimeline() {
         </AnimatePresence>
 
       </main>
+
+      {/* QR CODE MODAL */}
+      <AnimatePresence>
+        {showQr && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowQr(false)}
+              className="fixed inset-0 bg-sky-900/40 backdrop-blur-sm z-[150]"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] bg-white rounded-[32px] p-8 shadow-2xl shadow-sky-900/20 z-[200] flex flex-col items-center border border-sky-100"
+            >
+              <h3 className="text-xl font-black text-sky-900 mb-2">Scan to access</h3>
+              <p className="text-sm font-bold text-slate-400 mb-6 text-center">Share your ABHA profile securely with providers.</p>
+              
+              <div className="w-48 h-48 bg-white border-2 border-sky-100 rounded-2xl p-4 flex items-center justify-center">
+                 {/* Mock QR Code Pattern */}
+                 <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-1">
+                   {Array.from({ length: 16 }).map((_, i) => (
+                     <div key={i} className={cn("bg-sky-900 rounded-sm", i % 3 === 0 || i % 5 === 0 ? "opacity-100" : "opacity-0")} />
+                   ))}
+                   <div className="absolute w-12 h-12 border-4 border-sky-900 rounded bg-white flex items-center justify-center">
+                     <div className="w-4 h-4 bg-primary" />
+                   </div>
+                 </div>
+              </div>
+
+              <div className="mt-8 px-4 py-2 bg-sky-50 text-sky-900 text-xs font-black mono uppercase tracking-widest rounded-lg border border-sky-100">
+                ABHA: 88-3301-4402-1119
+              </div>
+
+              <button 
+                onClick={() => setShowQr(false)}
+                className="mt-6 w-full py-3 bg-sky-100 text-sky-900 font-bold rounded-xl hover:bg-sky-200 transition-colors"
+              >
+                Close
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
         .mono { font-family: 'Roboto Mono', monospace; }
