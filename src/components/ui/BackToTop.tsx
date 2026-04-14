@@ -64,7 +64,7 @@ export default function BackToTop() {
             "fixed z-[9999] flex items-center justify-center rounded-full text-white shadow-lg transition-all active:scale-95",
             "bg-[#00C896] hover:bg-[#00B085] hover:-translate-y-1 shadow-[#00C896]/40 hover:shadow-xl",
             // Responsive sizing and position to avoid mobile UI overlap
-            "right-8 bottom-24 md:bottom-8 w-10 h-10 md:w-12 md:h-12"
+            "right-6 sm:right-8 bottom-[80px] md:bottom-8 w-10 h-10 md:w-12 md:h-12"
           )}
           aria-label={t("back_to_top")}
           role="button"

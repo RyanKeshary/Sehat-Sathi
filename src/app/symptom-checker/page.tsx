@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { WifiOff, ActivitySquare, Phone, X } from "lucide-react";
+import { WifiOff, ActivitySquare, Phone, X, AlertCircle, Loader2 } from "lucide-react";
 import ChatInterface, { Message } from "@/components/symptom-checker/ChatInterface";
 import TriageResult, { TriageData } from "@/components/symptom-checker/TriageResult";
 import LanguageSelector, { Language, LANGUAGES } from "@/components/symptom-checker/LanguageSelector";
@@ -11,6 +11,8 @@ export default function SymptomCheckerPage() {
   const [isOffline, setIsOffline] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(LANGUAGES[0]);
   const [isLangSelectorOpen, setIsLangSelectorOpen] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -51,7 +53,7 @@ export default function SymptomCheckerPage() {
         setMessages((prev) => [
           ...prev,
           {
-            id: Date.now().toString() + "-ai",
+            id: (Date.now() + 1).toString() + "-ai",
             role: "ai",
             content: "You are currently offline. Your symptoms have been logged to your secure offline diary. We will analyze them and provide medical guidance as soon as your internet connection is restored.",
             timestamp: new Date(),
@@ -61,71 +63,123 @@ export default function SymptomCheckerPage() {
       return;
     }
 
+    if (selectedLanguage.id !== 'en') {
+      setIsTranslating(true);
+    }
+    setIsAnalyzing(true);
     setIsTyping(true);
+
+    // Create a placeholder for the AI message
+    const aiMessageId = (Date.now() + 2).toString() + "-ai";
+    const initialAiMsg: Message = {
+      id: aiMessageId,
+      role: "ai",
+      content: "",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, initialAiMsg]);
 
     try {
       const response = await fetch("/api/symptom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          symptoms: text, 
+          message: text, 
           language: selectedLanguage.id,
-          history: messages.filter(m => !m.isInitial).map(m => ({ role: m.role, content: m.content }))
+          conversationHistory: messages.filter(m => !m.isInitial).map(m => ({ 
+            role: m.role === 'ai' ? 'assistant' : m.role, 
+            content: m.content 
+          })),
+          sessionId: "default-session"
         }),
       });
 
-      const data = await response.json();
-
-      setIsTyping(false);
-
-      if (data.success) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString() + "-ai",
-            role: "ai",
-            content: data.analysis,
-            timestamp: new Date(),
-          },
-        ]);
-
-        setTriageData({
-          level: data.triageLevel,
-          percentage: data.triageLevel === "RED" ? 95 : data.triageLevel === "YELLOW" ? 70 : 40,
-          explanation: data.analysis,
-          symptoms: [
-            { name: "Primary Symptom", medicalTerm: "Symptom", description: text, importance: 10 },
-          ],
-          actions: data.recommendations.map((rec: string) => ({
-             type: data.triageLevel === "RED" ? "emergency" : "home",
-             text: rec,
-             timeframe: "Immediate"
-          })),
-          citations: [
-            "MOHFW Guidelines",
-            "Clinical Protocol v4",
-          ],
-        });
-        setShowMobileTriage(true);
-      } else {
-        throw new Error(data.error || "AI analysis failed");
+      if (!response.ok) {
+        throw new Error("AI service temporarily unavailable");
       }
-    } catch (error) {
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      let fullContent = "";
+      let triageDataJson = "";
+      let foundTriageMarker = false;
+
+      // Reset typing states as the stream starts
+      setIsTranslating(false);
+      setIsAnalyzing(false);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        
+        if (chunk.includes("__TRIAGE_DATA__")) {
+          foundTriageMarker = true;
+          const parts = chunk.split("__TRIAGE_DATA__");
+          fullContent += parts[0];
+          triageDataJson = parts[1];
+        } else if (foundTriageMarker) {
+          triageDataJson += chunk;
+        } else {
+          fullContent += chunk;
+          // Update message in real-time
+          setMessages((prev) => 
+            prev.map(m => m.id === aiMessageId ? { ...m, content: fullContent } : m)
+          );
+        }
+      }
+
       setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString() + "-error",
-          role: "ai",
-          content: "I'm having trouble processing your symptoms right now. Please try again or connect with a doctor directly.",
-          timestamp: new Date(),
-        },
-      ]);
+
+      // Parse and apply triage data
+      if (triageDataJson) {
+        try {
+          const extracted = JSON.parse(triageDataJson.trim());
+          const levelUpper = (extracted.triageLevel || "green").toUpperCase() as "GREEN" | "YELLOW" | "RED";
+          
+          setTriageData({
+            level: levelUpper,
+            percentage: Math.round((extracted.confidence || 0.8) * 100),
+            explanation: fullContent.split('\n')[0] || "Analysis complete",
+            symptoms: (extracted.symptoms || []).map((s: string) => ({
+              name: s,
+              medicalTerm: s,
+              description: "Identified in symptoms",
+              importance: 8
+            })),
+            actions: [
+              {
+                type: extracted.requiresEmergency ? "emergency" : (levelUpper === "YELLOW" ? "appointment" : "home"),
+                text: extracted.requiresEmergency ? "Seek immediate medical attention" : (levelUpper === "YELLOW" ? "Book a specialist consultation" : "Follow home care guidelines"),
+                timeframe: extracted.requiresEmergency ? "Immediate" : (levelUpper === "YELLOW" ? "Within 2-3 days" : "Next 24-48 hours")
+              }
+            ],
+            citations: ["Sehat Sathi Protocol v1.0", "WHO India Guidelines"],
+          });
+          setShowMobileTriage(true);
+        } catch (e) {
+          console.error("Failed to parse triage data", e);
+        }
+      }
+
+    } catch (error: any) {
+      setIsTyping(false);
+      setIsTranslating(false);
+      setIsAnalyzing(false);
+      setMessages((prev) => 
+        prev.map(m => m.id === aiMessageId 
+          ? { ...m, content: "I'm having trouble connecting to my knowledge base. Please try again in a moment. If this is an emergency, please call 108 immediately." } 
+          : m
+        )
+      );
     }
   };
 
   return (
-    <div className="h-screen w-full bg-[#060F1E] flex flex-col overflow-hidden font-sans">
+    <div className="h-screen w-full bg-[#060F1E] flex flex-col overflow-hidden font-sans pt-20">
       {/* Offline Banner */}
       <AnimatePresence>
         {isOffline && (
@@ -138,7 +192,7 @@ export default function SymptomCheckerPage() {
             <div className="container mx-auto px-4 py-2 flex items-center justify-between text-sm font-medium">
               <div className="flex items-center gap-2">
                 <WifiOff className="w-4 h-4" />
-                <span>AI requires internet. Offline mode: You can describe symptoms and we'll analyze when connected.</span>
+                <span>AI requires internet. Offline mode enabled.</span>
               </div>
             </div>
           </motion.div>
@@ -146,6 +200,23 @@ export default function SymptomCheckerPage() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden relative">
+        {/* Translating Indicator Overlay */}
+        <AnimatePresence>
+          {(isTranslating || isAnalyzing) && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-[#0A2540]/90 border border-white/10 px-4 py-2 rounded-full flex items-center gap-3 backdrop-blur-md shadow-2xl"
+            >
+              <Loader2 className="w-4 h-4 text-[#00C896] animate-spin" />
+              <span className="text-white/90 text-sm font-medium">
+                {isTranslating ? "Translating symptoms..." : "Sehat AI is thinking..."}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Main Conversation Area (65% on Desktop) */}
         <div className="flex-1 h-full flex flex-col relative min-w-0">
           <ChatInterface
@@ -186,7 +257,7 @@ export default function SymptomCheckerPage() {
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "35%", opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
-                className="hidden md:block h-full shrink-0 border-l border-white/10"
+                className="hidden md:block h-full shrink-0 border-l border-white/10 bg-[#060F1E]"
               >
                 <TriageResult data={triageData} />
               </motion.div>
@@ -217,7 +288,7 @@ export default function SymptomCheckerPage() {
           )}
         </AnimatePresence>
 
-        {/* Static Emergency Panel visible mostly when offline or as an overlay */}
+        {/* Static Emergency Panel */}
         {isOffline && (
           <div className="absolute top-20 right-4 z-20">
             <div className="bg-[#EF4444] text-white p-4 rounded-2xl shadow-2xl border border-white/20">

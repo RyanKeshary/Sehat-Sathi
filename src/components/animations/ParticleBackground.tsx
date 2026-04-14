@@ -84,14 +84,22 @@ function Connections({ count = 40 }) {
 }
 
 export default function ParticleBackground() {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-        <ambientLight intensity={0.5} />
-        <Particles count={200} />
-        <Particles count={100} />
-        <Connections count={50} />
-      </Canvas>
+      {isMounted && (
+        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+          <ambientLight intensity={0.5} />
+          <Particles count={200} />
+          <Particles count={100} />
+          <Connections count={50} />
+        </Canvas>
+      )}
     </div>
   );
 }

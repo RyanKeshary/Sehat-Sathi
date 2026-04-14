@@ -1,7 +1,18 @@
+import { OpenAI } from "openai";
 import { NextResponse } from "next/server";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const GOOGLE_TRANSLATE_API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY;
 
+/**
+ * Translates text using Google Translate API
+ * @param text The text to translate
+ * @param target Target language code
+ * @param source Source language code (optional)
+ */
 async function translateText(text: string | string[], target: string, source?: string) {
   if (!GOOGLE_TRANSLATE_API_KEY) {
     console.warn("GOOGLE_TRANSLATE_API_KEY not found. Skipping translation.");
@@ -35,77 +46,130 @@ async function translateText(text: string | string[], target: string, source?: s
   }
 }
 
+const SYSTEM_PROMPT = `You are Sehat AI, a medical triage assistant for Sehat Sathi, a rural Indian healthcare platform. Your role is to:
+1) Listen to patient symptoms described in any Indian language.
+2) Ask clarifying questions to understand severity (duration, pain scale 1-10, fever temperature if known, associated symptoms).
+3) Provide a triage assessment: GREEN (self-care at home), YELLOW (visit a doctor within 2-3 days), or RED (emergency — seek immediate care).
+4) Give practical, culturally appropriate home care advice for GREEN cases.
+5) Recommend specialist type for YELLOW cases.
+6) Give emergency instructions for RED cases.
+
+CRITICAL RULES:
+- Never diagnose specific diseases — only describe possible conditions.
+- Always recommend consulting a licensed doctor for final diagnosis.
+- Never recommend specific prescription drugs by name.
+- Do mention ORS for dehydration, paracetamol for fever (as it's OTC).
+- Always end with: 'This is preliminary guidance only. Please consult a certified doctor for diagnosis.'
+- Keep responses concise, warm, and in simple language.
+- If user describes chest pain + left arm pain + sweating, immediately classify as RED emergency.
+- If user describes difficulty breathing, immediately classify as RED.
+
+Common conditions in rural India context: 
+- Malaria (fever, chills, sweating — recommend malaria test, anti-malarials only with prescription)
+- Dengue (high fever, severe joint pain, rash — RED if bleeding symptoms)
+- Typhoid (sustained fever, weakness — requires antibiotic prescription)
+- Tuberculosis (persistent cough >2 weeks, weight loss, night sweats — refer to DOTS center)
+- Diarrhea (ORS, zinc for children — RED if blood in stool)
+- Malnutrition in children (MUAC screening — refer to NRC)
+- Hypertension (headache, dizziness — advise monitoring, medication compliance)
+- Diabetes complications (excessive thirst, frequent urination, wounds not healing — advise blood glucose test).`;
+
 export async function POST(req: Request) {
   try {
-    const { symptoms, language = "en", history } = await req.json();
+    const { message, language, conversationHistory = [], sessionId } = await req.json();
 
-    if (!symptoms) {
-      return NextResponse.json({ error: "No symptoms provided" }, { status: 400 });
+    if (!message) {
+      return NextResponse.json({ error: "No message provided" }, { status: 400 });
     }
 
-    // 1. Translate Input to English if not already in English
-    let processedSymptoms = symptoms;
-    if (language !== "en") {
-      processedSymptoms = await translateText(symptoms, "en", language);
+    // 1. Translate message to English if needed
+    let translatedMessage = message;
+    if (language !== 'en') {
+      translatedMessage = await translateText(message, 'en', language);
     }
 
-    // Simulate AI Processing Delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // 2. Prepare messages for OpenAI
+    const promptMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...conversationHistory.slice(-10).map((m: any) => ({
+        role: m.role === 'ai' ? 'assistant' : m.role,
+        content: m.content
+      })),
+      { role: 'user', content: translatedMessage }
+    ];
 
-    // Simulated RAG Logic (using translated symptoms)
-    let analysis = "";
-    let triageLevel = "GREEN";
-    let recommendations: string[] = [];
-
-    const inputLower = processedSymptoms.toLowerCase();
-
-    if (inputLower.includes("chest pain") || inputLower.includes("difficulty breathing") || inputLower.includes("heart")) {
-      analysis = "Your symptoms suggest a potentially cardiac or respiratory emergency. Immediate medical assessment is required.";
-      triageLevel = "RED";
-      recommendations = [
-        "Call emergency services immediately",
-        "Do not drive yourself to the hospital",
-        "Keep a record of when pain started",
-      ];
-    } else if (inputLower.includes("fever") && (inputLower.includes("cough") || inputLower.includes("body ache"))) {
-      analysis = "Your symptoms are consistent with a viral respiratory infection such as Influenza or COVID-19.";
-      triageLevel = "YELLOW";
-      recommendations = [
-        "Monitor your oxygen saturation",
-        "Stay hydrated and rest",
-        "Schedule a video consultation if fever exceeds 102°F",
-      ];
-    } else {
-      analysis = "Based on your description, your symptoms appear non-emergent at this time. However, persistence warrants a clinical review.";
-      triageLevel = "GREEN";
-      recommendations = [
-        "Observation for 24 hours",
-        "Standard OTC support if applicable",
-        "Book a routine check-up",
-      ];
-    }
-
-    // 2. Translate Output back to User's Language
-    if (language !== "en") {
-      const [translatedAnalysis, translatedRecs] = await Promise.all([
-        translateText(analysis, language, "en"),
-        translateText(recommendations, language, "en"),
-      ]);
-      analysis = translatedAnalysis as string;
-      recommendations = translatedRecs as string[];
-    }
-
-    return NextResponse.json({
-      success: true,
-      analysis,
-      triageLevel,
-      recommendations,
-      disclaimer: language === "en" 
-        ? "This is an AI-powered triage assistant. It is NOT a definitive diagnosis. If you feel very unwell, seek professional help immediately."
-        : await translateText("This is an AI-powered triage assistant. It is NOT a definitive diagnosis. If you feel very unwell, seek professional help immediately.", language, "en")
+    // 3. Initiate Streaming Completion
+    const responseStream = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: promptMessages as any,
+      stream: true,
     });
-  } catch (error) {
-    console.error("AI API Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+
+    // 4. Create a stream to handle translation and extraction
+    const stream = new ReadableStream({
+      async start(controller) {
+        let fullResponseEn = "";
+        const encoder = new TextEncoder();
+
+        try {
+          for await (const chunk of responseStream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              fullResponseEn += content;
+              // If it's English, we can stream directly
+              if (language === 'en') {
+                controller.enqueue(encoder.encode(content));
+              }
+            }
+          }
+
+          let finalResponseToUser = fullResponseEn;
+
+          // If not English, translate the full response and "stream" it to the UI
+          if (language !== 'en') {
+            finalResponseToUser = await translateText(fullResponseEn, language, 'en') as string;
+            // Use a small delay between words to simulate typing effect for the translated response
+            const tokens = finalResponseToUser.split(' ');
+            for (let i = 0; i < tokens.length; i++) {
+              controller.enqueue(encoder.encode(tokens[i] + (i === tokens.length - 1 ? "" : " ")));
+              await new Promise(r => setTimeout(r, 20)); 
+            }
+          }
+
+          // 5. Triage Extraction Phase
+          const extractionResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: 'system', content: "Based on this medical assistant response, extract in JSON: { \"triageLevel\": \"green\"|\"yellow\"|\"red\", \"symptoms\": string[], \"confidence\": number, \"requiresEmergency\": boolean }. Output ONLY JSON." },
+              { role: 'user', content: fullResponseEn }
+            ],
+            response_format: { type: 'json_object' }
+          });
+          
+          const extractionContent = extractionResponse.choices[0].message.content;
+          if (extractionContent) {
+            // Send extraction data as a special marker at the end
+            controller.enqueue(encoder.encode(`\n__TRIAGE_DATA__${extractionContent}`));
+          }
+
+          controller.close();
+        } catch (err) {
+          console.error("Streaming error:", err);
+          controller.error(err);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
+
+  } catch (error: any) {
+    console.error("API Route Error:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

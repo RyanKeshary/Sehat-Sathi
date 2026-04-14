@@ -5,32 +5,32 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
-  Users, 
   ClipboardList, 
   CalendarClock, 
-  Wallet, 
+  Banknote, 
   HeartHandshake, 
   Settings,
   BadgeCheck,
   LogOut
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { useMobile } from "@/hooks/useMobile";
 
+// Navigation configuration for the doctor dashboard
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/doctor" },
-  { icon: ClipboardList, label: "Today's Queue", href: "/dashboard/doctor/queue" },
-  { icon: Users, label: "Patient Records", href: "/dashboard/doctor/records" },
-  { icon: CalendarClock, label: "Schedule Management", href: "/dashboard/doctor/schedule" },
-  { icon: Wallet, label: "Earnings", href: "/dashboard/doctor/earnings" },
-  { icon: HeartHandshake, label: "Community Impact", href: "/dashboard/doctor/impact" },
-  { icon: Settings, label: "Settings", href: "/dashboard/doctor/settings" },
+  { icon: LayoutDashboard, label: "Dashboard", shortLabel: "Home", href: "/dashboard/doctor" },
+  { icon: ClipboardList, label: "Today's Queue", shortLabel: "Queue", href: "/dashboard/doctor#queue" },
+  { icon: CalendarClock, label: "Schedule", shortLabel: "Schedule", href: "/dashboard/doctor#schedule" },
+  { icon: Banknote, label: "Earnings", shortLabel: "Earnings", href: "/dashboard/doctor#earnings" },
+  { icon: Settings, label: "Settings", shortLabel: "Settings", href: "/dashboard/doctor/settings" },
 ];
 
-export default function DoctorSidebar() {
+/** ─── Desktop Doctor Sidebar ────────────────────────────── */
+function DesktopDoctorSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-screen bg-[#0A1A2F] border-r border-white/5 flex flex-col fixed left-0 top-0 z-40">
+    <aside className="w-64 h-screen bg-[#0A1A2F] border-r border-white/5 flex-col fixed left-0 top-0 z-40 hidden md:flex">
       {/* Logo Area with subtle teal gradient */}
       <div className="p-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-32 h-32 bg-[#00C896]/10 blur-[50px] -translate-x-1/2 -translate-y-1/2" />
@@ -96,5 +96,62 @@ export default function DoctorSidebar() {
         </button>
       </div>
     </aside>
+  );
+}
+
+/** ─── Mobile Bottom Nav for Doctors ─────────────────────── */
+function MobileDoctorBottomNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-[9990] md:hidden"
+      style={{
+        height: '64px',
+        background: '#0A1A2F',
+        borderTop: '1px solid rgba(255,255,255,0.1)',
+      }}
+    >
+      <div className="flex items-center justify-around h-full px-2">
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 active:bg-white/5 rounded-lg transition-colors"
+            >
+              <item.icon
+                size={24}
+                className={cn(
+                  "transition-colors",
+                  isActive ? "text-[#00C896]" : "text-white/50"
+                )}
+              />
+              <span
+                className={cn(
+                  "text-[10px] font-medium truncate max-w-[56px] text-center leading-tight",
+                  isActive ? "text-[#00C896]" : "text-white/40"
+                )}
+              >
+                {item.shortLabel}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+/** ─── Main Export ────────────────────────────────────────── */
+export default function DoctorSidebar() {
+  const isMobile = useMobile();
+
+  return (
+    <>
+      <DesktopDoctorSidebar />
+      {isMobile && <MobileDoctorBottomNav />}
+    </>
   );
 }

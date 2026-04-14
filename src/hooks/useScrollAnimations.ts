@@ -49,7 +49,12 @@ export function createCounterAnimation(
 
 /**
  * Master hook for all landing page GSAP ScrollTrigger animations.
- * Call once from the landing page component.
+ * 
+ * Mobile optimizations (viewport < 768px):
+ * - Parallax effects are disabled (they cause jank on mobile)
+ * - scrub values reduced from 1.5 to 0 (immediate snap)
+ * - stagger delays reduced from 100ms to 50ms
+ * - SVG path drawing uses IntersectionObserver instead of ScrollTrigger
  */
 export function useScrollAnimations() {
   const hasInitialized = useRef(false);
@@ -58,8 +63,11 @@ export function useScrollAnimations() {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
+    const isMobile = window.innerWidth < 768;
+
     // Allow DOM to settle before creating ScrollTriggers
-    const ctx = gsap.context(() => {
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
       // ─── 1. HERO FADE OUT ON SCROLL ─────────────────────
       const heroSection = document.querySelector("#hero-section");
       const heroContent = document.querySelector("#hero-content");
@@ -71,17 +79,18 @@ export function useScrollAnimations() {
             trigger: heroSection,
             start: "top top",
             end: "bottom top",
-            scrub: 1.5,
+            scrub: isMobile ? 0 : 1.5, // Immediate snap on mobile
           },
         });
 
         heroTl.to(
           heroContent,
-          { opacity: 0, y: -80, ease: "none" },
+          { opacity: 0, y: isMobile ? -40 : -80, ease: "none" },
           0
         );
 
-        if (heroParticles) {
+        // Disable parallax on mobile (causes jank)
+        if (heroParticles && !isMobile) {
           heroTl.to(
             heroParticles,
             { opacity: 0, y: 40, scale: 0.95, ease: "none" },
@@ -98,9 +107,9 @@ export function useScrollAnimations() {
 
         if (problemHeading) {
           gsap.from(problemHeading, {
-            y: 60,
+            y: isMobile ? 30 : 60,
             opacity: 0,
-            duration: 1,
+            duration: isMobile ? 0.6 : 1,
             ease: "power3.out",
             scrollTrigger: {
               trigger: problemHeading,
@@ -111,12 +120,12 @@ export function useScrollAnimations() {
 
         problemCards.forEach((card, i) => {
           gsap.from(card, {
-            y: 80,
+            y: isMobile ? 40 : 80,
             opacity: 0,
             scale: 0.95,
-            duration: 0.8,
+            duration: isMobile ? 0.5 : 0.8,
             ease: "power3.out",
-            delay: i * 0.15,
+            delay: i * (isMobile ? 0.05 : 0.15), // Faster stagger on mobile
             scrollTrigger: {
               trigger: card,
               start: "top 85%",
@@ -137,62 +146,69 @@ export function useScrollAnimations() {
           start: "top 75%",
           once: true,
           onEnter: () => {
-            createCounterAnimation(htmlEl, end, 2, suffix);
+            createCounterAnimation(htmlEl, end, isMobile ? 1.5 : 2, suffix);
           },
         });
       });
 
       // ─── 4. HOW-IT-WORKS PATH DRAW ─────────────────────
-      const hiwPath = document.querySelector("#hiw-draw-path") as SVGPathElement | null;
-      const hiwSteps = document.querySelectorAll(".hiw-step");
+      // On mobile, the SVG path draw uses IntersectionObserver (set up in the component itself)
+      // On desktop, use GSAP ScrollTrigger
+      if (!isMobile) {
+        const hiwPath = document.querySelector("#hiw-draw-path") as SVGPathElement | null;
+        const hiwSteps = document.querySelectorAll(".hiw-step");
 
-      if (hiwPath) {
-        const totalLength = hiwPath.getTotalLength();
-        gsap.set(hiwPath, {
-          strokeDasharray: totalLength,
-          strokeDashoffset: totalLength,
-        });
+        if (hiwPath) {
+          const totalLength = hiwPath.getTotalLength();
+          gsap.set(hiwPath, {
+            strokeDasharray: totalLength,
+            strokeDashoffset: totalLength,
+          });
 
-        gsap.to(hiwPath, {
-          strokeDashoffset: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: "#how-it-works",
-            start: "top 60%",
-            end: "bottom 60%",
-            scrub: true,
-          },
-        });
-
-        // Stagger step reveals tied to path progress
-        hiwSteps.forEach((step, i) => {
-          gsap.from(step, {
-            y: 40,
-            opacity: 0,
-            scale: 0.9,
-            duration: 0.8,
-            ease: "power3.out",
+          gsap.to(hiwPath, {
+            strokeDashoffset: 0,
+            ease: "none",
             scrollTrigger: {
               trigger: "#how-it-works",
-              start: () => `top+=${i * 25}% 60%`,
+              start: "top 60%",
+              end: "bottom 60%",
+              scrub: true,
             },
           });
-        });
+
+          // Stagger step reveals tied to path progress
+          hiwSteps.forEach((step, i) => {
+            gsap.from(step, {
+              y: 40,
+              opacity: 0,
+              scale: 0.9,
+              duration: 0.8,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: "#how-it-works",
+                start: () => `top+=${i * 25}% 60%`,
+              },
+            });
+          });
+        }
       }
 
       // ─── 5. TESTIMONIALS PARALLAX ──────────────────────
-      const testimContainer = document.querySelector("#testimonials-container");
-      if (testimContainer) {
-        ScrollTrigger.create({
-          trigger: "#testimonials-section",
-          start: "top bottom",
-          end: "bottom top",
-          onUpdate: (self) => {
-            gsap.set(testimContainer, {
-              y: self.progress * -50,
-            });
-          },
-        });
+      // Disabled on mobile (causes jank)
+      if (!isMobile) {
+        const testimContainer = document.querySelector("#testimonials-container");
+        if (testimContainer) {
+          ScrollTrigger.create({
+            trigger: "#testimonials-section",
+            start: "top bottom",
+            end: "bottom top",
+            onUpdate: (self) => {
+              gsap.set(testimContainer, {
+                y: self.progress * -50,
+              });
+            },
+          });
+        }
       }
 
       // ─── 6. CTA DRAMATIC REVEAL ────────────────────────
@@ -202,7 +218,7 @@ export function useScrollAnimations() {
       if (ctaCard) {
         gsap.from(ctaCard, {
           clipPath: "inset(0 100% 0 0)",
-          duration: 1.2,
+          duration: isMobile ? 0.8 : 1.2,
           ease: "power4.inOut",
           scrollTrigger: {
             trigger: ctaCard,
@@ -213,27 +229,41 @@ export function useScrollAnimations() {
       }
 
       if (ctaHeadline) {
-        const chars = splitTextToChars(ctaHeadline);
-        gsap.from(chars, {
-          opacity: 0,
-          y: 60,
-          stagger: 0.03,
-          duration: 0.6,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ctaHeadline,
-            start: "top 70%",
-          },
-        });
+        if (isMobile) {
+          // Simpler fade-in on mobile (no char splitting — saves CPU)
+          gsap.from(ctaHeadline, {
+            opacity: 0,
+            y: 30,
+            duration: 0.6,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ctaHeadline,
+              start: "top 70%",
+            },
+          });
+        } else {
+          const chars = splitTextToChars(ctaHeadline);
+          gsap.from(chars, {
+            opacity: 0,
+            y: 60,
+            stagger: 0.03,
+            duration: 0.6,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ctaHeadline,
+              start: "top 70%",
+            },
+          });
+        }
       }
 
       // ─── 7. GENERIC SCROLL REVEALS ─────────────────────
       const reveals = document.querySelectorAll("[data-scroll-reveal]");
       reveals.forEach((el) => {
         gsap.from(el, {
-          y: 30,
+          y: isMobile ? 20 : 30,
           opacity: 0,
-          duration: 0.8,
+          duration: isMobile ? 0.5 : 0.8,
           ease: "power3.out",
           scrollTrigger: {
             trigger: el,
@@ -241,10 +271,12 @@ export function useScrollAnimations() {
           },
         });
       });
-    });
+      });
+      return () => ctx.revert();
+    }, 300);
 
     return () => {
-      ctx.revert();
+      clearTimeout(timer);
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
