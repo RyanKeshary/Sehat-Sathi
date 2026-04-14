@@ -167,7 +167,7 @@ export function useWebRTC({ sessionId, isCaller, localStream }: WebRTCOptions) {
 
   const shareScreen = async () => {
     try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: 'always' }, audio: true });
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: 'always' } as any, audio: true });
       const videoSender = pcRef.current?.getSenders().find(s => s.track?.kind === 'video');
       if (videoSender) {
         videoSender.replaceTrack(screenStream.getVideoTracks()[0]);
