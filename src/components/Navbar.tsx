@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Cross, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -18,10 +19,9 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "For Patients", href: "#" },
-    { name: "For Doctors", href: "#" },
-    { name: "For Clinics", href: "#" },
-    { name: "About", href: "#" },
+    { name: "For Patients", href: "/onboarding" },
+    { name: "For Doctors", href: "/doctor/login" },
+    { name: "For Clinics", href: "/clinic/dashboard" },
   ];
 
   return (
@@ -43,13 +43,13 @@ export function Navbar() {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
               href={link.href}
               className="text-sm font-medium text-body hover:text-primary transition-colors"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -58,12 +58,12 @@ export function Navbar() {
           <span className="px-3 py-1 bg-secondary/10 text-secondary text-xs font-bold rounded-full border border-secondary/20">
             DPDPA Compliant
           </span>
-          <button className="text-sm font-medium text-body hover:text-primary transition-colors">
+          <Link href="/doctor/login" className="text-sm font-medium text-body hover:text-primary transition-colors">
             Login
-          </button>
-          <button className="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-premium">
+          </Link>
+          <Link href="/onboarding" className="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-premium">
             Get Started
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Toggle */}
@@ -85,22 +85,23 @@ export function Navbar() {
             className="absolute top-full left-0 right-0 bg-white shadow-xl p-6 flex flex-col gap-4 border-t border-accent"
           >
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 className="text-lg font-medium text-body"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <hr className="border-accent" />
             <div className="flex flex-col gap-3">
-              <button className="w-full py-3 text-center font-medium text-body border border-accent rounded-lg">
+              <Link href="/doctor/login" onClick={() => setMobileMenuOpen(false)} className="w-full py-3 text-center font-medium text-body border border-accent rounded-lg">
                 Login
-              </button>
-              <button className="w-full py-3 text-center font-bold text-white bg-primary rounded-lg">
+              </Link>
+              <Link href="/onboarding" onClick={() => setMobileMenuOpen(false)} className="w-full py-3 text-center font-bold text-white bg-primary rounded-lg">
                 Get Started
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

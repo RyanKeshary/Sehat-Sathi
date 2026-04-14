@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export function Hero() {
@@ -49,12 +50,12 @@ export function Hero() {
           </p>
 
           <div className="flex flex-wrap gap-4 mt-4">
-            <button className="px-8 py-4 bg-primary text-white font-bold rounded-xl flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-primary/20">
+            <Link href="/onboarding" className="px-8 py-4 bg-primary text-white font-bold rounded-xl flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-primary/20">
               Start Your Journey <ArrowRight className="w-5 h-5" />
-            </button>
-            <button className="px-8 py-4 bg-white border border-accent text-heading font-bold rounded-xl hover:bg-accent/50 transition-colors shadow-sm">
+            </Link>
+            <Link href="/demo/whatsapp" className="px-8 py-4 bg-white border border-accent text-heading font-bold rounded-xl hover:bg-accent/50 transition-colors shadow-sm">
               Watch Demo
-            </button>
+            </Link>
           </div>
 
           {/* Trust Strip */}

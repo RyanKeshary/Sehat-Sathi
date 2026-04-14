@@ -45,8 +45,8 @@ export function MagneticCursor() {
         x: e.clientX,
         y: e.clientY,
         radius: 0,
-        maxRadius: 60,
-        alpha: 0.8,
+        maxRadius: 100,
+        alpha: 1.0,
         startTime: performance.now()
       });
     };
@@ -60,9 +60,10 @@ export function MagneticCursor() {
       // Draw soft background glow around the cursor
       const { x, y } = mouseRef.current;
       if (x !== -100 && y !== -100) {
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, 400);
-        gradient.addColorStop(0, "rgba(8, 145, 178, 0.08)");
-        gradient.addColorStop(0.5, "rgba(8, 145, 178, 0.03)");
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, 500);
+        gradient.addColorStop(0, "rgba(8, 145, 178, 0.15)");
+        gradient.addColorStop(0.2, "rgba(8, 145, 178, 0.08)");
+        gradient.addColorStop(0.6, "rgba(8, 145, 178, 0.02)");
         gradient.addColorStop(1, "rgba(8, 145, 178, 0)");
         
         ctx.fillStyle = gradient;
@@ -73,7 +74,7 @@ export function MagneticCursor() {
       for (let i = clicksRef.current.length - 1; i >= 0; i--) {
         const click = clicksRef.current[i];
         const elapsed = time - click.startTime;
-        const duration = 600; // ms
+        const duration = 800; // ms
         
         if (elapsed > duration) {
           clicksRef.current.splice(i, 1);
@@ -81,16 +82,16 @@ export function MagneticCursor() {
         }
 
         const progress = elapsed / duration;
-        // Ease out quad
-        const easeOut = 1 - (1 - progress) * (1 - progress);
+        // Ease out quint for punchier start and slow end
+        const easeOut = 1 - Math.pow(1 - progress, 5);
         
         click.radius = click.maxRadius * easeOut;
-        click.alpha = 0.6 * (1 - progress);
+        click.alpha = 1 * (1 - progress);
 
         ctx.beginPath();
         ctx.arc(click.x, click.y, click.radius, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(8, 145, 178, ${click.alpha})`;
-        ctx.lineWidth = 1.5 + (1 - progress) * 2;
+        ctx.lineWidth = 3 + (1 - progress) * 4;
         ctx.stroke();
       }
 

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { User, Stethoscope, Building2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function RoleCards() {
   const roles = [
@@ -9,19 +10,19 @@ export function RoleCards() {
       title: "For Patients",
       desc: "Manage your health records, schedule appointments, and get AI-assisted symptom checks even without internet.",
       icon: User,
-      href: "#",
+      href: "/onboarding",
     },
     {
       title: "For Doctors",
       desc: "Streamline your practice with AI-powered intake, patient history timelines, and secure e-prescriptions.",
       icon: Stethoscope,
-      href: "#",
+      href: "/doctor/login",
     },
     {
       title: "For Clinic Ops",
       desc: "Optimize queue management, billing, and ABDM compliance dashboard with real-time analytics.",
       icon: Building2,
-      href: "#",
+      href: "/clinic/dashboard",
     },
   ];
 
@@ -46,12 +47,12 @@ export function RoleCards() {
               <p className="text-body mb-8 leading-relaxed">
                 {role.desc}
               </p>
-              <a
+              <Link
                 href={role.href}
                 className="inline-flex items-center gap-2 font-bold text-primary group-hover:gap-3 transition-all"
               >
                 Enter Dashboard <ArrowRight className="w-4 h-4" />
-              </a>
+              </Link>
             </motion.div>
           ))}
         </div>
