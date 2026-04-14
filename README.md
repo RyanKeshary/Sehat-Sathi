@@ -87,6 +87,7 @@
 </div>
 
 ## 🔑 Demo Access — Try Instantly
+> **Live at:** [https://sehat-sathi-six.vercel.app/](https://sehat-sathi-six.vercel.app/)
 
 > [!NOTE]
 > **No installation needed. Click the live demo and log in with these credentials:**
