@@ -85,7 +85,7 @@ export function MagneticCursor() {
         // Ease out quint for punchier start and slow end
         const easeOut = 1 - Math.pow(1 - progress, 5);
         
-        click.radius = click.maxRadius * easeOut;
+        click.radius = Math.max(0, click.maxRadius * easeOut);
         click.alpha = 1 * (1 - progress);
 
         ctx.beginPath();
