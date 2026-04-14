@@ -16,16 +16,9 @@ import {
   Eye, 
   Edit2, 
   Trash2, 
-  ChevronRight, 
   X,
-  Lock,
-  MessageSquare,
-  Globe,
   Share2,
-  FileText,
-  Mail,
-  MoreVertical,
-  Check
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

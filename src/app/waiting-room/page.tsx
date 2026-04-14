@@ -3,21 +3,24 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Users, 
   Video, 
   Mic2, 
   PhoneCall, 
-  Heart, 
-  Info, 
   ShieldCheck,
   Check,
   Stethoscope,
-  ChevronRight,
   TrendingUp,
   Apple,
   Wind
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// --- Types ---
+
+interface HealthTip {
+  text: string;
+  icon: React.ElementType;
+}
 
 // --- Sub-components ---
 
@@ -65,7 +68,7 @@ const QueueRing = ({ progress = 0.5, minutes = 6, position = 2 }: { progress?: n
   );
 };
 
-const ConnectivitySegment = ({ label, icon: Icon, active, bandwidth }: { label: string; icon: any; active?: boolean; bandwidth?: string }) => (
+const ConnectivitySegment = ({ label, icon: Icon, active }: { label: string; icon: React.ElementType; active?: boolean }) => (
   <div className="flex flex-col items-center gap-2 flex-1">
     <div className={cn(
       "w-full h-12 rounded-xl flex items-center justify-center border transition-all duration-500",
@@ -79,7 +82,7 @@ const ConnectivitySegment = ({ label, icon: Icon, active, bandwidth }: { label: 
   </div>
 );
 
-const HealthTipsCarousel = ({ tips }: { tips: any[] }) => {
+const HealthTipsCarousel = ({ tips }: { tips: HealthTip[] }) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -127,7 +130,7 @@ const HealthTipsCarousel = ({ tips }: { tips: any[] }) => {
 // --- Page Component ---
 
 export default function WaitingRoom() {
-  const tips = [
+  const tips: HealthTip[] = [
     { text: "Keep a steady record of your symptoms to help the doctor during consultation.", icon: Stethoscope },
     { text: "Vitamin D levels are crucial for immune health during seasonal changes.", icon: Apple },
     { text: "Breathing exercises can help reduce acute anxiety during sudden fever.", icon: Wind },

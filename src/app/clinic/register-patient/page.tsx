@@ -18,7 +18,8 @@ import {
   Heart,
   Droplet,
   Wind,
-  ChevronDown
+  ChevronDown,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

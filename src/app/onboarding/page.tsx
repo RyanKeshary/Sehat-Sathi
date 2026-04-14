@@ -89,7 +89,7 @@ function ActionCard({
   desc, 
   delay 
 }: { 
-  icon: any; 
+  icon: React.ElementType; 
   title: string; 
   desc: string; 
   delay: number;
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0, 0, 0.2, 1] as const } },
   };
 
   return (

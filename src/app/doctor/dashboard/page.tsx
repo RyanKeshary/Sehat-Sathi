@@ -18,7 +18,8 @@ import {
   MoreVertical,
   Cross,
   Check,
-  Activity
+  Activity,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -5,15 +5,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, 
   AlertTriangle, 
-  Eye, 
   Video, 
   FileText, 
-  Bell,
-  X,
   Stethoscope,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  Bell,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// --- Types ---
+
+interface NextStepProps {
+  num: number;
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  delay: number;
+}
 
 // --- Sub-components ---
 
@@ -92,7 +102,7 @@ const SummaryRow = ({ label, value, chips }: { label: string; value?: string; ch
   </div>
 );
 
-const NextStepRow = ({ num, icon: Icon, title, desc, delay }: { num: number; icon: any; title: string; desc: string; delay: number }) => (
+const NextStepRow = ({ num, icon: Icon, title, desc, delay }: NextStepProps) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}

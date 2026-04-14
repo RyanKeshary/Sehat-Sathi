@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Line, 
-  Doughnut, 
-  Bar 
+  Doughnut 
 } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -35,6 +34,16 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// --- Types ---
+
+interface KpiProps {
+  label: string;
+  value: string;
+  trend?: string;
+  color?: string;
+  icon: React.ElementType;
+}
+
 // Register ChartJS
 if (typeof window !== "undefined") {
   ChartJS.register(
@@ -60,7 +69,6 @@ const CountUp = ({ value, duration = 1.2 }: { value: string | number, duration?:
   useEffect(() => {
     let start = 0;
     const end = target;
-    const stepTime = Math.abs(Math.floor(duration * 1000 / end));
     
     const timer = setInterval(() => {
       start += Math.ceil(end / 60);
@@ -82,7 +90,7 @@ const CountUp = ({ value, duration = 1.2 }: { value: string | number, duration?:
   return <>{formatted}</>;
 };
 
-const KpiCard = ({ label, value, trend, color = "text-sky-900", icon: Icon }: any) => (
+const KpiCard = ({ label, value, trend, color = "text-sky-900", icon: Icon }: KpiProps) => (
   <div className="bg-white p-6 rounded-[32px] border border-sky-100 shadow-sm flex flex-col justify-between h-[160px]">
      <div className="flex justify-between items-start">
         <div className="w-10 h-10 bg-sky-50 rounded-2xl flex items-center justify-center text-primary">

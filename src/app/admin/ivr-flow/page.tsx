@@ -102,7 +102,7 @@ const IvrNode = ({ node, isSelected, onClick }: { node: NodeData, isSelected: bo
   );
 };
 
-const IvrEdge = ({ from, to, label, type = "Teal" }: EdgeData & { from: NodeData, to: NodeData }) => {
+const IvrEdge = ({ from, to, label, type = "Teal" }: { from: NodeData; to: NodeData; label?: string; type?: "Teal" | "Amber" | "Red" }) => {
   const color = type === "Teal" ? "#2DD4BF" : type === "Amber" ? "#F59E0B" : "#EF4444";
   const isDashed = type === "Amber";
   
@@ -143,7 +143,7 @@ export default function IvrFlowPage() {
   const nodes: NodeData[] = [
     { id: "entry", label: "Entry: Phone Pickup", type: "Standard", x: 600, y: 80, script: "Welcome to Sehat Sathi. Namaste.", time: "0:04" },
     { id: "lang", label: "Lang Select", type: "Decision", x: 600, y: 220, script: "For Hindi press 1. For Marathi press 2...", branches: ["1-9", "0"] },
-    { id: "service", label: "Service Type", type: "Decision", x: 600, y: 400, x_offset: 0 },
+    { id: "service", label: "Service Type", type: "Decision", x: 600, y: 400 },
     
     // New Consultation Path
     { id: "complaint", label: "Chief Complaint", type: "Standard", x: 300, y: 550, script: "Tell us what is bothering you.", time: "0:14" },
