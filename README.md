@@ -22,7 +22,7 @@
 
 <br/>
 
-[![🌐 Live Demo](https://img.shields.io/badge/🌐%20LIVE%20DEMO-sehat--sathi--six.vercel.app-00C896?style=for-the-badge&labelColor=0A2540)](https://sehat-sathi-six.vercel.app/)
+[![🌐 Live Demo](https://img.shields.io/badge/🌐%20LIVE%20DEMO-sehat--sathi--six.vercel.app-00C896?style=for-the-badge&labelColor=0A2540)](https://client-hazel-xi-63.vercel.app/)
 
 <br/>
 
