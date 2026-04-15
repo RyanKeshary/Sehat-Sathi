@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-plus-jakarta);
+  --font-mono: var(--font-mono);
+  --font-hindi: var(--font-noto-devanagari);
+
+  --color-primary: #0A2540;
+  --color-accent: #00C896;
+  --color-highlight: #3B82F6;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-surface: #F8FAFC;
+  --color-dark-bg: #060F1E;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+@layer base {
+  :root {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    /* Dynamic viewport height fallback — updated via JS for browsers without dvh */
+    --vh: 1vh;
+  }
+
+  * {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  html {
+    scroll-behavior: initial;
+  }
+
+  body {
+    background-color: var(--color-dark-bg);
+    color: white;
+    overflow-x: hidden;
+  }
+
+  /* ─── Touch-friendly defaults ─────────────────────────── */
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    cursor: pointer;
+  }
+
+  /* Ensure minimum 44×44px touch targets */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, #00C896, #3B82F6);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(0, 200, 150, 0.4);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+
+  /* ─── Dynamic viewport height utility ─────────────────── */
+  .h-screen-safe {
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100); /* JS fallback */
+  }
+
+  .min-h-screen-safe {
+    min-height: 100dvh;
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
+
+  /* ─── Mobile feature card reveal animation ────────────── */
+  .mobile-feature-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .mobile-feature-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── SVG path draw animation for mobile ──────────────── */
+  @keyframes svgPathDraw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .svg-path-draw {
+    animation: svgPathDraw 1.5s ease-out forwards;
+  }
+}
+
+/* Lenis CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+
+/* Sehat Sathi Registration Animations */
+@keyframes bgShift {
+  0% { background-color: #060F1E; }
+  50% { background-color: #0A2540; }
+  100% { background-color: #060F1E; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-10px) translateX(5px); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes signal {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.animated-bg {
+  animation: bgShift 8s ease-in-out infinite;
+}
+
+.float-1 { animation: float 8s ease-in-out infinite; }
+.float-2 { animation: float 12s ease-in-out infinite; }
+.float-3 { animation: float 10s ease-in-out infinite; }
+
+.marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.signal-ring {
+  animation: signal 2s ease-out infinite;
+}
+
+.check-anim {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+/* ─── Mobile Bottom Nav spacing ──────────────────────────── */
+@media (max-width: 767px) {
+  .dashboard-content-area {
+    padding-bottom: 80px;
+  }
+}
+
+/* ─── Hamburger animation ────────────────────────────────── */
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hamburger-open .hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-open .hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}

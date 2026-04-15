@@ -1,0 +1,5 @@
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-14 16:35:32"}
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-14 17:06:25"}
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-14 17:11:11"}
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-14 17:16:16"}
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-14 17:37:26"}

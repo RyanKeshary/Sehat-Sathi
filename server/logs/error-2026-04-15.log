@@ -1,0 +1,2 @@
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-15 00:10:59"}
+{"level":"error","message":"Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","service":"sehatsetu-api","timestamp":"2026-04-15 00:49:06"}

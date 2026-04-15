@@ -1,0 +1,111 @@
+/* Design System Tokens for Sehatsetu */
+:root {
+  /* Colors - Medical, Trustworthy Palette */
+  --color-bg-primary: #F4F7FB;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-elevated: #EDF2F7;
+  
+  --color-text-primary: #1A2332;
+  --color-text-secondary: #4A5A72;
+  --color-text-muted: #8A9BB0;
+  
+  /* Accents - No Neon, No Purple */
+  --color-accent-blue: #1A6FA3;
+  --color-accent-blue-light: #EBF4FF;
+  --color-accent-green: #1A7A4A;
+  --color-accent-green-light: #E6F7EE;
+  
+  /* Status */
+  --color-status-emergency: #C0392B;
+  --color-status-high: #D97706;
+  --color-status-medium: #1A6FA3;
+  --color-status-low: #1A7A4A;
+  
+  --color-border: #D4DCE8;
+  
+  /* Typography */
+  --font-primary: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Lora', Georgia, serif;
+  
+  /* Fluid Typography Scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  
+  /* Utils */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  
+  --transition-base: all 0.2s ease;
+}
+
+[data-theme='dark'] {
+  --color-bg-primary: #0F1923;
+  --color-bg-surface: #1A2535;
+  --color-bg-elevated: #223044;
+  
+  --color-text-primary: #E8EDF4;
+  --color-text-secondary: #8A9DBB;
+  --color-text-muted: #5A6F8A;
+  
+  --color-accent-blue-light: #0D2840;
+  --color-accent-green-light: #0A2E1C;
+  
+  --color-border: #2A3A50;
+}
+
+/* Global Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

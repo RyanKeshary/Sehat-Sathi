@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1A6FA3;
+  --color-primary-dark: #14557b;
+  --color-primary-light: #EBF4FF;
+  
+  --color-success: #1A7A4A;
+  --color-success-dark: #125c38;
+  --color-success-light: #E6F7EE;
+
+  --color-danger: #C0392B;
+  --color-danger-dark: #922b21;
+  --color-danger-light: #FDEDEC;
+
+  --font-display: "Lora", serif;
+  --font-sans: "DM Sans", sans-serif;
+  
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+}
+
+/* Base resets if tailwind base isn't enough */
+@layer base {
+  body {
+    @apply font-sans bg-[#F4F7FB] text-[#1A2332] antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold;
+  }
+}
+
+/* Custom Scrollbar */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

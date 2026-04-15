@@ -1,0 +1,258 @@
+PART 1: MASTER IMPLEMENTATION PLAN
+1.1 — Design System & Brand Identity Documentation
+Color Palette:
+
+text
+
+Primary:     #0A2540  (Deep Navy — trust, medical authority)
+Accent:      #00C896  (Emerald Green — health, life, growth)
+Highlight:   #3B82F6  (Electric Blue — tech, AI, innovation)
+Warning:     #F59E0B  (Amber — urgency, triage alerts)
+Danger:      #EF4444  (Red — emergency states)
+Surface:     #F8FAFC  (Near-white — clean minimalism)
+Dark BG:     #060F1E  (Near-black — hero sections)
+Glass:       rgba(255,255,255,0.08) (Glassmorphism panels)
+Typography:
+
+text
+
+Display:     "Plus Jakarta Sans" — Bold 700/800
+Body:        "Inter" — Regular 400, Medium 500
+Mono/Data:   "JetBrains Mono" — health data, stats
+Hindi/Indic: "Noto Sans Devanagari" — multilingual support
+Animation Principles:
+
+text
+
+Easing:      cubic-bezier(0.16, 1, 0.3, 1) — spring-like
+Duration:    200ms micro / 400ms standard / 800ms page
+Scroll:      GSAP ScrollTrigger + Lenis smooth scroll
+Particles:   Three.js floating medical molecules
+1.2 — Complete File Structure
+text
+
+sehat-sathi/
+│
+├── 📁 public/
+│   ├── 📁 assets/
+│   │   ├── 📁 icons/           # SVG medical icons (localized)
+│   │   ├── 📁 images/          # Optimized WebP images
+│   │   ├── 📁 lottie/          # Lottie animation JSONs
+│   │   └── 📁 fonts/           # Self-hosted font files
+│   ├── manifest.json           # PWA manifest
+│   ├── sw.js                   # Service Worker (offline-first)
+│   └── robots.txt
+│
+├── 📁 src/
+│   │
+│   ├── 📁 app/                 # Next.js 14 App Router
+│   │   ├── layout.tsx          # Root layout + providers
+│   │   ├── page.tsx            # Landing page (/)
+│   │   ├── globals.css         # Global styles + animations
+│   │   │
+│   │   ├── 📁 (auth)/
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx    # Login page
+│   │   │   └── register/
+│   │   │       └── page.tsx    # Registration (patient/doctor)
+│   │   │
+│   │   ├── 📁 dashboard/
+│   │   │   ├── layout.tsx      # Dashboard shell layout
+│   │   │   ├── page.tsx        # Patient dashboard
+│   │   │   └── doctor/
+│   │   │       └── page.tsx    # Doctor dashboard
+│   │   │
+│   │   ├── 📁 symptom-checker/
+│   │   │   └── page.tsx        # AI Symptom Checker
+│   │   │
+│   │   ├── 📁 consult/
+│   │   │   ├── page.tsx        # Doctor discovery/booking
+│   │   │   └── [sessionId]/
+│   │   │       └── page.tsx    # Video consultation room
+│   │   │
+│   │   ├── 📁 health-records/
+│   │   │   └── page.tsx        # Digital health records
+│   │   │
+│   │   ├── 📁 appointments/
+│   │   │   └── page.tsx        # Appointment management
+│   │   │
+│   │   └── 📁 api/
+│   │       ├── 📁 auth/        # NextAuth routes
+│   │       ├── 📁 symptom/     # AI symptom API
+│   │       ├── 📁 video/       # WebRTC signaling
+│   │       ├── 📁 records/     # Health records CRUD
+│   │       └── 📁 translate/   # Bhashini API proxy
+│   │
+│   ├── 📁 components/
+│   │   │
+│   │   ├── 📁 landing/         # Landing page sections
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── ProblemSection.tsx
+│   │   │   ├── FeaturesSection.tsx
+│   │   │   ├── HowItWorksSection.tsx
+│   │   │   ├── StatsSection.tsx
+│   │   │   ├── TestimonialsSection.tsx
+│   │   │   ├── MVPShowcase.tsx
+│   │   │   └── CTASection.tsx
+│   │   │
+│   │   ├── 📁 ui/              # Reusable UI primitives
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Toast.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   ├── LanguageSwitcher.tsx
+│   │   │   └── OfflineBanner.tsx
+│   │   │
+│   │   ├── 📁 navigation/
+│   │   │   ├── Navbar.tsx      # Floating glass navbar
+│   │   │   ├── Sidebar.tsx     # Dashboard sidebar
+│   │   │   └── MobileNav.tsx
+│   │   │
+│   │   ├── 📁 symptom-checker/
+│   │   │   ├── ChatInterface.tsx
+│   │   │   ├── VoiceInput.tsx
+│   │   │   ├── TriageResult.tsx
+│   │   │   ├── LanguageSelector.tsx
+│   │   │   └── SymptomCard.tsx
+│   │   │
+│   │   ├── 📁 video/
+│   │   │   ├── VideoRoom.tsx
+│   │   │   ├── VideoControls.tsx
+│   │   │   ├── ConnectionQuality.tsx
+│   │   │   ├── BandwidthAdapter.tsx
+│   │   │   └── WaitingRoom.tsx
+│   │   │
+│   │   ├── 📁 health-records/
+│   │   │   ├── RecordTimeline.tsx
+│   │   │   ├── RecordCard.tsx
+│   │   │   ├── UploadDocument.tsx
+│   │   │   ├── OfflineSyncIndicator.tsx
+│   │   │   └── ABHALinker.tsx
+│   │   │
+│   │   ├── 📁 dashboard/
+│   │   │   ├── StatsGrid.tsx
+│   │   │   ├── UpcomingAppointments.tsx
+│   │   │   ├── QuickActions.tsx
+│   │   │   ├── RecentActivity.tsx
+│   │   │   └── HealthSummaryChart.tsx
+│   │   │
+│   │   └── 📁 animations/
+│   │       ├── ParticleBackground.tsx
+│   │       ├── HeartbeatLine.tsx
+│   │       ├── CounterAnimation.tsx
+│   │       ├── ScrollReveal.tsx
+│   │       └── MorphingBlob.tsx
+│   │
+│   ├── 📁 lib/
+│   │   ├── 📁 ai/
+│   │   │   ├── symptomChecker.ts   # RAG pipeline client
+│   │   │   ├── triage.ts           # Urgency classification
+│   │   │   └── bhashini.ts         # Bhashini API integration
+│   │   │
+│   │   ├── 📁 webrtc/
+│   │   │   ├── peerConnection.ts   # WebRTC peer setup
+│   │   │   ├── codecOptimizer.ts   # VP9/Opus config
+│   │   │   └── bandwidthMonitor.ts # Real-time bandwidth
+│   │   │
+│   │   ├── 📁 offline/
+│   │   │   ├── indexedDB.ts        # Local DB operations
+│   │   │   ├── syncQueue.ts        # Background sync queue
+│   │   │   ├── encryptedVault.ts   # AES-256 vault
+│   │   │   └── conflictResolver.ts # CRDT conflict resolution
+│   │   │
+│   │   ├── 📁 auth/
+│   │   │   ├── authConfig.ts       # NextAuth configuration
+│   │   │   └── rbac.ts             # Role-based access control
+│   │   │
+│   │   └── 📁 utils/
+│   │       ├── animations.ts       # GSAP animation helpers
+│   │       ├── cn.ts               # clsx/tailwind merge
+│   │       └── formatters.ts       # Date/health data formatters
+│   │
+│   ├── 📁 hooks/
+│   │   ├── useOnlineStatus.ts      # Network detection
+│   │   ├── useOfflineSync.ts       # Sync state management
+│   │   ├── useLanguage.ts          # i18n language hook
+│   │   ├── useVoiceInput.ts        # Speech recognition hook
+│   │   ├── useWebRTC.ts            # Video call hook
+│   │   └── useScrollAnimation.ts   # GSAP scroll hook
+│   │
+│   ├── 📁 store/
+│   │   ├── authStore.ts            # Zustand auth state
+│   │   ├── patientStore.ts         # Patient health data
+│   │   ├── callStore.ts            # Video call state
+│   │   └── uiStore.ts              # UI/theme preferences
+│   │
+│   ├── 📁 types/
+│   │   ├── patient.ts
+│   │   ├── doctor.ts
+│   │   ├── healthRecord.ts
+│   │   ├── appointment.ts
+│   │   └── symptom.ts
+│   │
+│   └── 📁 i18n/
+│       ├── config.ts               # i18n configuration
+│       └── 📁 locales/
+│           ├── en.json
+│           ├── hi.json             # Hindi
+│           ├── pa.json             # Punjabi
+│           ├── bn.json             # Bengali
+│           └── ta.json             # Tamil
+│
+├── 📁 prisma/
+│   └── schema.prisma               # Database schema
+│
+├── 📁 docs/
+│   ├── ARCHITECTURE.md             # System architecture
+│   ├── API_REFERENCE.md            # API documentation
+│   ├── SECURITY.md                 # Security protocols
+│   └── DEPLOYMENT.md               # Deployment guide
+│
+├── next.config.js
+├── tailwind.config.js
+├── tsconfig.json
+├── package.json
+└── .env.example
+1.3 — Technology Stack
+text
+
+FRONTEND FRAMEWORK:   Next.js 14 (App Router) + TypeScript
+STYLING:              Tailwind CSS + Framer Motion + GSAP
+ANIMATIONS:           GSAP ScrollTrigger, Lenis, Three.js, Lottie
+STATE MANAGEMENT:     Zustand + React Query (TanStack)
+DATABASE:             PostgreSQL (Neon) + Prisma ORM
+OFFLINE DB:           IndexedDB via Dexie.js (typed wrapper)
+AUTH:                 NextAuth.js v5 (JWT + Sessions)
+VIDEO:                WebRTC + Daily.co SDK / custom signaling
+AI/LLM:               OpenAI API (GPT-4o) + RAG via LangChain.js
+LANGUAGE AI:          Bhashini API (ASR/NMT/TTS)
+SPEECH:               Web Speech API + OpenAI Whisper fallback
+ENCRYPTION:           WebCrypto API (AES-256-GCM)
+PWA:                  next-pwa + custom Service Worker
+DEPLOYMENT:           Vercel + Railway (backend services)
+MONITORING:           Sentry + PostHog analytics
+1.4 — Critical Architecture Notes for AI Builder
+text
+
+OFFLINE-FIRST RULE: Every data write must go to IndexedDB first,
+then sync to server. Never block UI on network requests.
+
+SECURITY RULE: All PHI (Protected Health Information) in IndexedDB
+must be encrypted with AES-256-GCM before storage. Use WebCrypto API.
+
+WEBRTC RULE: Always prefer VP9 codec. Start with 480p resolution.
+Implement adaptive bitrate. Include TURN server fallback.
+
+LANGUAGE RULE: Every user-facing string must pass through i18n.
+Support RTL layout for Urdu. Use Noto Sans Devanagari for Hindi.
+
+ANIMATION RULE: Use will-change: transform sparingly. All scroll
+animations via GSAP ScrollTrigger. Page transitions via Framer Motion.
+
+ACCESSIBILITY: WCAG 2.1 AA minimum. All icons have aria-labels.
+High contrast ratios (4.5:1 minimum). Voice navigation supported.
+
+TRIAGE COLORS: Green = self-care, Yellow = schedule visit, 
+Red = emergency. Never use red for non-emergency UI elements.
